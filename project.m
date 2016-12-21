@@ -1,0 +1,97 @@
+
+choice = input('1.Image Compression using DCT\n2.Image compression using wcompress\n3.Edge Detection in Images\n');
+if(choice == 1)
+    disp('Image compression by using DCT and blockproc function');
+    tic;
+    im=imread('pikachu.png');
+    if(size(im,3)>1)
+        inim=double(rgb2gray(im));
+        disp('The given image is RGB. It is converted to grayscale');
+        [r,c]=size(inim);
+        dim=strcat('image size',int2str(r),'X',int2str(c),' pixels');
+        disp(dim);
+    end
+    inim1=uint8(inim);
+    subplot(1,2,1);
+    imshow(inim1);
+    imwrite(inim1, 'original.jpg');
+    title 'Original Image';
+    blksize=8;
+    dctcoef=blockproc(inim,[blksize, blksize],@(block_struct)dct2(block_struct.data));
+    filt28=[1 1 1 1 1 1 1 0 ;
+        1 1 1 1 1 1 0 0 ;
+        1 1 1 1 1 0 0 0 ;
+        1 1 1 1 0 0 0 0 ;
+        1 1 1 0 0 0 0 0 ;
+        1 1 0 0 0 0 0 0 ;
+        1 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0];
+    filt10=[1 1 1 1 0 0 0 0 ;
+        1 1 1 0 0 0 0 0 ;
+        1 1 0 0 0 0 0 0 ;
+        1 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0];
+    filt6 = [1 1 1 0 0 0 0 0 ;
+        1 1 0 0 0 0 0 0 ;
+        1 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0];
+    filt3 = [1 1 0 0 0 0 0 0 ;
+        1 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0];
+    filt1 = [1 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0 ;
+        0 0 0 0 0 0 0 0];
+    filt=filt3;
+    cuttcoef=blockproc(dctcoef,[blksize, blksize],@(block_struct)block_struct.data.*filt);
+    decompim=blockproc(cuttcoef,[blksize, blksize],@(block_struct)idct2(block_struct.data));
+    subplot(1,2,2);
+    imshow(decompim,[]);
+    imwrite(uint8(decompim), 'compressed.jpg');
+    title 'Reconstructed Image';
+    toc;
+elseif(choice == 2)
+    tic;
+    disp('Image compression using wavelet transform');
+    X = imread('pikachu.png');
+    [cr,bpp] = wcompress('c',X,'abc.wtc','spiht','maxloop',10);
+    Xc = wcompress('u','abc.wtc');
+    delete('abc.wtc');
+    subplot(1,2,1);
+    image(X);
+    subplot(1,2,2);
+    image(Xc);
+    imwrite(Xc,'wCompressed.jpg');
+    toc;
+elseif(choice == 3)
+    tic;
+    disp('Detection of Egdes in an Image');
+    X = imread('brain.jpg');
+    blocksize = 256;
+    detected_edges = blockproc(rgb2gray(X),[blocksize blocksize],@(block_struct)edge(block_struct.data,'canny', 0.4));
+    subplot(1,2,1);
+    imshow(X);
+    title('Original Tumor Image');
+    subplot(1,2,2);
+    imshow(detected_edges);
+    title('Tumor Using Edge Detection');
+    toc;
+else
+    disp('Invalid input!');
+end
